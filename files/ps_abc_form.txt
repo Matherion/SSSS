@@ -1,0 +1,4 @@
+Selecteer hierboven de begeleider bij wie je praktijksessies hebt gevolgd. Als je geen sessies hebt gevolgd, wordt er automatisch een begeleider toegekend. De begeleider die je ABC huiswerkopdracht nakijkt, zal je ook begeleiden bij je eindopdracht (D).<br /><br />
+<div class="subtitle">Inleveren huiswerkopdracht Psychologisch Survey (taken A, B en C):</div>
+<div class="formRow"><div class="formLabel">Nummer datafile:</div><input class="formInput" type="text" name="abc_datanr" value="<?php echo($abc_datanr); ?>"></input></div>
+<div class="formRow"><div class="formLabel">ABC huiswerkopdracht:</div><input class="formInput" type="file" name="abc_file"></input></div>

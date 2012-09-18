@@ -1,0 +1,3 @@
+Zorg dat je hierboven de begeleider specicifeert die je ABC huiswerkopdracht heeft nagekeken en die je heeft begeleid bij de eindopdracht (D).<br /><br />
+<div class="subtitle">Inleveren eindopdracht Psychologisch Survey (taak D):</div>
+<div class="formRow"><div class="formLabel">Bestand:</div><input class="formInput" type="file" name="d_file"></input></div>

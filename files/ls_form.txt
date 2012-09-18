@@ -1,0 +1,2 @@
+<div class="subtitle">Inleveren introductie en methode voor Literatuurstudie:</div>
+<div class="formRow"><div class="formLabel">Bestand:</div><input class="formInput" type="file" name="d_file"></input></div>
