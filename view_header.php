@@ -23,9 +23,9 @@
     <title>
       OU Psy: inleveren 'huiswerk' en papers
     </title>
-    <link rel="stylesheet" type="text/css" href="submit.css" />
+    <link rel="stylesheet" type="text/css" href="/submit/submit.css" />
     <script type="text/javascript" src="/js/jquery/jquery-1.7.min.js"></script>
-    <script type="text/javascript" src="jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/submit/jquery.validate.min.js"></script>
     <script type="text/javascript">
       $().ready(function(){
         // Javascript message

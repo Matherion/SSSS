@@ -14,51 +14,63 @@
  
 ***************************************************/
 
-  // This is useful for debugging: if this is set, no email is sent.
-  if (isset($_GET['debug'])) {
-    echo('<form action="index.php?debug&action=submit" id="form" method="post" enctype="multipart/form-data">');
-  }
-  else {
-    echo('<form action="index.php?action=submit" id="form" method="post" enctype="multipart/form-data">');
-  }
+  // The debug GET variable is useful for debugging: if this is set, no email is sent.
+  // The admin GET variable enabled normal use of the site when it's in maintenance (see
+  // index.php).
+  echo('<form action="index.php?'.(isset($_GET['debug'])?"debug&":"").(isset($_GET['admin'])?"admin&":"").'action=submit" id="form" method="post" enctype="multipart/form-data">');
 ?>
-  <div class="formRow"><div class="formLabel">Naam:</div><input class="formInput" type="text" name="name" id="name" value="<?php echo($name); ?>"></input></div>
-  <div class="formRow"><div class="formLabel">Student nummer:</div><input class="formInput" type="text" name="idnr" id="idnr" value="<?php echo($idnr); ?>"></input></div>
-  <div class="formRow"><div class="formLabel">Email adres:</div><input class="formInput" type="text" name="email" id="email" value="<?php echo($email); ?>"></input></div>
-  <div class="formBlock"><div class="formRow">
+    <div class="headingBar">Cursus en/of onderdeel:</div>
+      <div class="formBlock">
+        <div class="formRow">
 <?php
-  foreach ($courses as $course) {
-    echo("<div class=\"courseButton\" onclick='showBlock(\"{$course->id}\");'>{$course->name}</div>");
+  foreach ($courses as $currentCourse) {
+    echo("<div class=\"courseButton\" onclick='showBlock(\"{$currentCourse->id}\");'>{$currentCourse->name}</div>");
   }
 ?>
-  </div><div class="clearFloat"></div></div>
-  <div class="formBlock" style="display:none" id="begeleider">
-    <div class="formRow"><div class="formLabel">Begeleider:</div><select class="formInput" name="begeleider">
-      <option value="Nothing"></option><option value="No supervisor">Ik had geen begeleider</option>
-<?php
-  foreach ($teachers as $teacher) {
-    echo("<option value=\"{$teacher->id}\">{$teacher->name}</option>");
-  }
-?>
-    </select></div>
-  </div>
+        </div>
+        <div class="clearFloat"></div>
+      </div>
 <?php
   $showBlockJavaScriptFunction = "<script type=\"text/javascript\">showBlock = function (id) {";
-  foreach ($courses as $course) {
-    echo("<div class=\"formBlock\" style=\"display:none\" id=\"course_{$course->id}\">");
-    include(FILES_PATH.$course->formfile);
+  foreach ($courses as $currentCourse) {
+    // If this is a resubmission, one of the courses is already
+    // selected. If that is the case, show it; all other courses
+    // are initially hidden.
+    if ($course == $currentCourse->id) {
+      echo("<div class=\"formBlock\" style=\"display:block\" id=\"course_{$currentCourse->id}\">");
+    }
+    else {
+      echo("<div class=\"formBlock\" style=\"display:none\" id=\"course_{$currentCourse->id}\">");
+    }
+    include(FILES_PATH.$currentCourse->formfile);
     echo("</div>");
-    $showBlockJavaScriptFunction .= 'if (id=="'.$course->id.'") { $("#course_'.$course->id.'").css("display","block");
-  } else { $("#course_'.$course->id.'").css("display","none"); }';
- }
- $showBlockJavaScriptFunction .= '  $("#begeleider").css("display","block");
+    $showBlockJavaScriptFunction .= 'if (id=="'.$currentCourse->id.'") { $("#course_'.$currentCourse->id.'").css("display","block");
+  } else { $("#course_'.$currentCourse->id.'").css("display","none"); }';
+  }
+  $showBlockJavaScriptFunction .= '  $("#formEnd").css("display","block");
   $("input[name=course]").val(id);}
   </script>';
 
 ?>
-  <div class="formRow"><div class="formLabel">Bericht:</div><textarea name="message" rows="4" cols="35"></textarea>
-  <div class="formRow">
-    <input type="hidden" name="course" value=""></input>
-    <input type="submit" name="submit" value="Verstuur"></input>
-  </div>
-</form>
+
+    <div id="formEnd" <?php echo(($course>0?'style="display:block;"':'style="display:none;"')); ?> >
+      <div class="headingBar">Bericht (optioneel):</div>
+      <div class="formRow">
+        <div class="formLabel">Bericht:</div>
+        <textarea name="message" rows="4" cols="35"><?php echo($_POST['message']);?></textarea>
+      </div>
+      <br />
+      <div class="headingBar">Inleveren:</div>
+      <br />Controleer de email adres(sen), en zorg dat deze klopt (of kloppen) alvorens dit formulier in te leveren!
+      <div class="formRow">
+        <input type="hidden" name="course" value="<?php echo($course); ?>"></input>
+        <input type="submit" name="submit" value="Verstuur"></input>
+      </div>
+    </div>
+  </form>
+  
+<?php
+
+  echo($showBlockJavaScriptFunction);
+
+?>

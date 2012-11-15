@@ -14,6 +14,9 @@
  
 ***************************************************/
 
+  // Use $maintenance to take the site offline
+  $maintenance = false;
+
   define("MAX_FILE_SIZE_BYTES", 2097152);
   define("MAX_FILE_SIZE_TEXT", "twee megabyte");
   define("FILES_PATH", "files/");
@@ -56,25 +59,42 @@
     echo($error);
   }
   
+  function prepareFile ($prefix, $filearray, $name, $idnr) {
+    global $log;
+    $tmpFileName = "uploads/" . $prefix . " " . $name . " (" . $idnr . ") [" . pathinfo($filearray["name"], PATHINFO_FILENAME) . "]." . pathinfo($filearray["name"], PATHINFO_EXTENSION);
+    move_uploaded_file($filearray["tmp_name"], $tmpFileName);
+    $log .= "File '{$filearray["name"]}' renamed to '$tmpFileName'.\n";
+    return $tmpFileName;
+  }
+  
   // Connect to database and load submissions per supervisor
 
   try {
     # MySQL with PDO_MYSQL
     $dbHandle = new PDO("mysql:host=".MYSQL_HOST.";dbname=".MYSQL_DB, MYSQL_USER, MYSQL_PASSWORD);
+
     $getTeachers = $dbHandle->query("SELECT * FROM `teachers`;");
     $getTeachers->setFetchMode(PDO::FETCH_CLASS, 'Teacher');
+
     $getCourses = $dbHandle->query("SELECT * FROM `courses`;");
     $getCourses->setFetchMode(PDO::FETCH_CLASS, 'Course');
+
     $getCapacity = $dbHandle->prepare("SELECT `capacity` FROM `capacities` WHERE `courses_id` = :course AND `teachers_id` = :teacher LIMIT 1;");
     $getCapacity->setFetchMode(PDO::FETCH_ASSOC);
     $getCapacity->bindParam(':course', $course_id, PDO::PARAM_INT);
     $getCapacity->bindParam(':teacher', $teacher_id, PDO::PARAM_INT);
-    $getSupervisedStudents = $dbHandle->prepare("SELECT COUNT(*) FROM `submissions` WHERE `courses_id` = :course AND `teachers_id` = :teacher AND `timestamp` >= :startAcadYear;");
-    $getSupervisedStudents->setFetchMode(PDO::FETCH_ASSOC);
-    $getSupervisedStudents->bindParam(':course', $course_id, PDO::PARAM_INT);
-    $getSupervisedStudents->bindParam(':teacher', $teacher_id, PDO::PARAM_INT);
-    $getSupervisedStudents->bindParam(':startAcadYear', $startOfCurrentAcademicYear, PDO::PARAM_STR);
-    $setSubmission = $dbHandle->prepare("INSERT INTO submissions (name, nr, email, courses_id, teachers_id) VALUE (:name, :nr, :email, :course, :teacher);");
+
+    //$getSubmissions = $dbHandle->prepare("SELECT COUNT(*) FROM `submissions` WHERE `courses_id` = :course AND `teachers_id` = :teacher AND `timestamp` >= :startAcadYear;");
+
+    $getPapers = $dbHandle->prepare("SELECT COUNT(*) FROM `papers` WHERE `courses_id` = :course AND `teachers_id` = :teacher AND `timestamp` >= :startAcadYear;");
+    $getPapers->setFetchMode(PDO::FETCH_ASSOC);
+    $getPapers->bindParam(':course', $course_id, PDO::PARAM_INT);
+    $getPapers->bindParam(':teacher', $teacher_id, PDO::PARAM_INT);
+    $getPapers->bindParam(':startAcadYear', $startOfCurrentAcademicYear, PDO::PARAM_STR);
+
+    $setPaper = $dbHandle->prepare("INSERT INTO papers (courses_id, teachers_id, teacherSelection, nrOfStudents) VALUE (:course, :teacher, :teacherSelection, :nrOfStudents);");
+
+    $setSubmission = $dbHandle->prepare("INSERT INTO submissions (name, nr, email, courses_id, teachers_id, papers_id, papers_teachers_id, papers_courses_id) VALUE (:name, :nr, :email, :course, :teacher, :papers_id, :papers_teachers_id, :papers_courses_id);");
     
     // Get the teachers and the courses
     while($obj = $getTeachers->fetch()) {
@@ -90,8 +110,8 @@
   }
 
   // Load course-specific functions
-  foreach ($courses as $course) {
-    include(FILES_PATH.$course->functionfile);
+  foreach ($courses as $currentCourse) {
+    include(FILES_PATH.$currentCourse->functionfile);
   }
   
   // Find when the last first of september was (the start of the academic year:
@@ -108,60 +128,24 @@
   // query to get the submitted papers.
   
   $log = "SSSS submission\n\nCurrent date is ".date("d-n-Y")."; current academic year started on ".$startOfCurrentAcademicYear.".\n\n";
+  $errorBlock = "";
 
   if (isset($_GET['action']) && ($_GET['action']=="submit")) {
 
-    // Verification of general fields
-    if (isset($_POST['name'])       &&
-        isset($_POST['idnr'])       &&
-        isset($_POST['email'])      &&
-        isset($_POST['course'])     &&
-        isset($_POST['begeleider'])  ) {
-
-      $name=trim($_POST['name']);
-      $idnr=trim($_POST['idnr']);
-      $email=trim($_POST['email']);
+    if (isset($_POST['course'])) {
       $course=trim($_POST['course']);
-      $begeleider=trim($_POST['begeleider']);
-
-      $errorBlock = "";
-      
-      $infoBlock = "<li>Naam: $name</li>
-                    <li>Id-nummer: $idnr</li>
-                    <li>E-mail adres: $email</li>
-                    <li>Cursus: {$courses[$course]->name}</li>";
-
-      if (strlen($_POST['name']) == 0) {
-        $errorBlock .= "<li>Er is geen naam ingevuld.</li>";
+      if (array_key_exists($course, $courses)) {
+        $infoBlock = "<li>Cursus: {$courses[$course]->name}</li>";
+        $log .= "Received submission for course: $course ({$courses[$course]->name}).\n";
+        call_user_func($courses[$course]->verifyfunction);
       }
-
-      if (strlen($_POST['idnr']) == 0) {
-        $errorBlock .= "<li>Er is geen ID-nummer ingevuld.</li>";
+      else {
+        $errorBlock .= "<li>Er is een cursus geselecteerd die niet bestaat (nummer: $course).</li>";
+        errorHandler("Non-existant course POSTed (number: $course)!");
       }
-      else if (!is_numeric($idnr))
-      {
-        $errorBlock .= "<li>Je id-nummer bestaat niet uit alleen maar cijfers.</li>";
-      }
-
-      if (strlen($_POST['email']) == 0) {
-        $errorBlock .= "<li>Er is geen E-mail adres ingevuld.</li>";
-      }
-      
-      if (!array_key_exists($course, $courses)) {
-        $errorBlock .= "<li>Er is geen cursus geselecteerd.</li>";
-      }
-
-      if (!($begeleider == "No supervisor") && !array_key_exists($begeleider, $teachers)) {
-        $errorBlock .= "<li>Er geen begeleider geselecteerd (let op: als je geen begeleider had, selecteer dan 'Ik had geen begeleider'!).</li>";
-      }
-      
     }
     else {
-      $errorBlock .= "<li>Een of meerdere van de basisvelden (naam, id-nummer, email-adres en cursus) is leeg.</li>";
-    }
-
-    if (!($errorBlock)) {
-      call_user_func($courses[$course]->verifyfunction);
+      $errorBlock .= "<li>Er is geen cursus geselecteerd.</li>";
     }
     
     if (!($errorBlock)) {
@@ -169,8 +153,6 @@
       // We have everything we need. Now we can determine whom to send the email to.
       // We only have to pick a random supervisor if the student didn't specify a
       // supervisor.
-      
-      $log .= "Received a submission by $name (id $idnr), $email.\nCourse: $course ({$courses[$course]->name}).\n";
       
       if ($begeleider == "No supervisor") {
       
@@ -187,16 +169,16 @@
               // Read available capacity for this teacher (for this course)
               // from the database
               if (!$getCapacity->execute()) {
-                errorHandler("Errorcode: {$sth->errorCode()}, errorinfo: {$sth->errorInfo ()}.");
+                errorHandler("Errorcode: {$getCapacity->errorCode()}, errorinfo: {$getCapacity->errorInfo ()}.");
               }
               $tempCapacityArray = $getCapacity->fetch();
               $capacity[$teacher_id] = $tempCapacityArray['capacity'];
               // Read number of supervised students for this teacher
               // (for this course) from the database
-              if (!$getSupervisedStudents->execute()) {
-                errorHandler("Errorcode: {$sth->errorCode()}, errorinfo: {$sth->errorInfo ()}.");
+              if (!$getPapers->execute()) {
+                errorHandler("Errorcode: {$getPapers->errorCode()}, errorinfo: {$getPapers->errorInfo ()}.");
               }
-              $tempSupervisedStudentsArray = $getSupervisedStudents->fetch();
+              $tempSupervisedStudentsArray = $getPapers->fetch();
               $supervisedStudents[$teacher_id] = $tempSupervisedStudentsArray['COUNT(*)'];
             }
             catch(PDOException $e) {
@@ -218,7 +200,7 @@
             
           }
           else {
-            $log .= "Teach with id {$teacher->id} ({$teacher->name}) is not active.\n";
+            $log .= "Teacher with id {$teacher->id} ({$teacher->name}) is not active.\n";
           }
         }
         
@@ -278,7 +260,7 @@
       else {
         // A supervisor was chosen, so store the supervisor id in our designated teacher variable.
         $designatedTeacher = $teachers[$begeleider];
-        $log .= "Supervisor specified. Setting teacher {$designatedTeacher->is} ({$designatedTeacher->name}) as supervisor.\n";
+        $log .= "Supervisor specified. Setting teacher {$designatedTeacher->id} ({$designatedTeacher->name}) as supervisor.\n";
       }
 
       $log .= "\n";
@@ -307,18 +289,23 @@
       echo("<div class=\"errorblock\">FOUT:<ul>".$errorBlock."</ul></div>");
       include("view_intro.php");
       include("view_form.php");
-      echo($showBlockJavaScriptFunction);
     }
 
   }
-  else
-  {
+  else if (($maintenance) && !(isset($_GET['admin']))) {
+    include("view_header.php");
+    include("view_maintenance.php");
+  }
+  else {
     include("view_header.php");
     include("view_intro.php");
     include("view_form.php");
-    echo($showBlockJavaScriptFunction);
   }
-  
+
+  if (isset($_GET['debug'])) {
+    echo("NOTE: IN DEBUG MODE!");
+  }
+
   include("view_footer.php");
 
   // Close connection with database
