@@ -17,8 +17,8 @@
   // Use $maintenance to take the site offline
   $maintenance = false;
 
-  define("MAX_FILE_SIZE_BYTES", 2097152);
-  define("MAX_FILE_SIZE_TEXT", "twee megabyte");
+  define("MAX_FILE_SIZE_BYTES", 3145728);
+  define("MAX_FILE_SIZE_TEXT", "drie megabyte");
   define("FILES_PATH", "files/");
   
   include('db.php'); /* Looks like this:
@@ -286,7 +286,7 @@
       echo("<div class=\"infoblock\"><strong>Ontvangen informatie:</strong><ul>".$infoBlock."</ul></div>");
     }
     if ($errorBlock) {
-      echo("<div class=\"errorblock\">FOUT:<ul>".$errorBlock."</ul></div>");
+      echo("<div class=\"errorblock\">FOUT:<ul>".$errorBlock."</ul>Je verslag is dus nog <strong>niet</strong> ingeleverd! Corrigeer deze fout(en) en submit dit formulier opnieuw.</div>");
       include("view_intro.php");
       include("view_form.php");
     }

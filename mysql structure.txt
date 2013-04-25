@@ -1,0 +1,99 @@
+-- --------------------------------------------------------
+-- Host:                         oupsy.nl
+-- Server version:               5.0.67-community - MySQL Community Edition (GPL)
+-- Server OS:                    pc-linux-gnu
+-- HeidiSQL version:             7.0.0.4053
+-- Date/time:                    2013-04-25 17:25:53
+-- --------------------------------------------------------
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET NAMES utf8 */;
+/*!40014 SET FOREIGN_KEY_CHECKS=0 */;
+
+-- Dumping structure for table oupsyusr_submit.capacities
+CREATE TABLE IF NOT EXISTS `capacities` (
+  `id` int(11) NOT NULL auto_increment,
+  `teachers_id` int(11) NOT NULL,
+  `courses_id` int(11) NOT NULL,
+  `capacity` int(11) default NULL,
+  PRIMARY KEY  (`id`,`teachers_id`,`courses_id`),
+  KEY `fk_capacities_teachers1` (`teachers_id`),
+  KEY `fk_capacities_courses1` (`courses_id`),
+  CONSTRAINT `fk_capacities_teachers1` FOREIGN KEY (`teachers_id`) REFERENCES `teachers` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_capacities_courses1` FOREIGN KEY (`courses_id`) REFERENCES `courses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8;
+
+
+-- Dumping structure for table oupsyusr_submit.courses
+CREATE TABLE IF NOT EXISTS `courses` (
+  `id` int(11) NOT NULL auto_increment,
+  `name` varchar(45) default NULL,
+  `formfile` varchar(25) default NULL,
+  `functionfile` varchar(25) default NULL,
+  `verifyfunction` varchar(20) default NULL,
+  `sendfunction` varchar(20) default NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+
+
+-- Dumping structure for table oupsyusr_submit.papers
+CREATE TABLE IF NOT EXISTS `papers` (
+  `id` int(11) NOT NULL auto_increment,
+  `teachers_id` int(11) NOT NULL,
+  `courses_id` int(11) NOT NULL,
+  `teacherSelection` tinyint(1) default NULL,
+  `timestamp` timestamp NULL default CURRENT_TIMESTAMP,
+  `nrOfStudents` int(11) default NULL,
+  PRIMARY KEY  (`id`,`teachers_id`,`courses_id`),
+  KEY `fk_papers_teachers1` (`teachers_id`),
+  KEY `fk_papers_courses1` (`courses_id`),
+  CONSTRAINT `fk_papers_teachers1` FOREIGN KEY (`teachers_id`) REFERENCES `teachers` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_papers_courses1` FOREIGN KEY (`courses_id`) REFERENCES `courses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=235 DEFAULT CHARSET=utf8;
+
+
+-- Dumping structure for table oupsyusr_submit.submissions
+CREATE TABLE IF NOT EXISTS `submissions` (
+  `id` int(11) NOT NULL auto_increment,
+  `name` varchar(45) default NULL,
+  `nr` int(11) default NULL,
+  `email` varchar(45) default NULL,
+  `timestamp` timestamp NULL default CURRENT_TIMESTAMP,
+  `courses_id` int(11) NOT NULL,
+  `teachers_id` int(11) NOT NULL,
+  `papers_id` int(11) NOT NULL,
+  `papers_teachers_id` int(11) NOT NULL,
+  `papers_courses_id` int(11) NOT NULL,
+  PRIMARY KEY  (`id`,`courses_id`,`teachers_id`,`papers_id`,`papers_teachers_id`,`papers_courses_id`),
+  KEY `fk_submissions_courses` (`courses_id`),
+  KEY `fk_submissions_teachers1` (`teachers_id`),
+  KEY `fk_submissions_papers1` (`papers_id`,`papers_teachers_id`,`papers_courses_id`),
+  CONSTRAINT `fk_submissions_papers1` FOREIGN KEY (`papers_id`, `papers_teachers_id`, `papers_courses_id`) REFERENCES `papers` (`id`, `teachers_id`, `courses_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_submissions_courses` FOREIGN KEY (`courses_id`) REFERENCES `courses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_submissions_teachers1` FOREIGN KEY (`teachers_id`) REFERENCES `teachers` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=337 DEFAULT CHARSET=utf8;
+
+
+
+-- Dumping structure for table oupsyusr_submit.teachers
+CREATE TABLE IF NOT EXISTS `teachers` (
+  `id` int(11) NOT NULL auto_increment,
+  `name` varchar(45) default NULL,
+  `email` varchar(45) default NULL,
+  `active` tinyint(1) default NULL,
+  `acronym` varchar(3) default NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+
+
+
+-- Dumping structure for table oupsyusr_submit.teacher_statusSwitches
+CREATE TABLE IF NOT EXISTS `teacher_statusSwitches` (
+  `id` int(11) NOT NULL auto_increment,
+  `teachers_id` int(11) NOT NULL,
+  `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  `setStatus` tinyint(1) default NULL,
+  PRIMARY KEY  (`id`),
+  KEY `fk_teacher_statusSwitches_teachers1` (`teachers_id`),
+  CONSTRAINT `fk_teacher_statusSwitches_teachers1` FOREIGN KEY (`teachers_id`) REFERENCES `teachers` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;

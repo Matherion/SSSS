@@ -17,7 +17,7 @@
   // The debug GET variable is useful for debugging: if this is set, no email is sent.
   // The admin GET variable enabled normal use of the site when it's in maintenance (see
   // index.php).
-  echo('<form action="index.php?'.(isset($_GET['debug'])?"debug&":"").(isset($_GET['admin'])?"admin&":"").'action=submit" id="form" method="post" enctype="multipart/form-data">');
+  echo('<form action="index.php?'.(isset($_GET['debug'])?"debug&":"").(isset($_GET['admin'])?"admin&":"").'action=submit" id="form" method="post" enctype="multipart/form-data" accept-charset="ISO-8859-1">');
 ?>
     <div class="headingBar">Cursus en/of onderdeel:</div>
       <div class="formBlock">

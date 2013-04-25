@@ -27,9 +27,9 @@
       $idnr=trim($_POST['ps_abc_idnr']);
       $email=trim($_POST['ps_abc_email']);
 
-      $infoBlock .= "<li>Naam: $name</li>
-                     <li>Id-nummer: $idnr</li>
-                     <li>E-mail adres: $email</li>";
+      $infoBlock .= "<li>Naam: ".htmlentities($name)."</li>
+                     <li>Id-nummer: ".htmlentities($idnr)."</li>
+                     <li>E-mail adres: ".htmlentities($email)."</li>";
 
       if (strlen($_POST['ps_abc_name']) == 0) {
         $errorBlock .= "<li>Er is geen naam ingevuld.</li>";
@@ -97,7 +97,7 @@
                      </ul></li>";
       
       if ($_FILES["ps_abc_file"]["size"] > MAX_FILE_SIZE_BYTES) {
-        $errorBlock .= "<li>Het bestand is groter dan {MAX_FILE_SIZE_TEXT}.</li>";
+        $errorBlock .= "<li>Het bestand is groter dan ".MAX_FILE_SIZE_TEXT." (oftewel ".MAX_FILE_SIZE_BYTES." bytes). Als het een afbeelding is, verlaag de resolutie. Dit kan bijvoorbeeld op <a href=\"http://www.shrinkpictures.com/\">http://www.shrinkpictures.com/</a>.</li>";
       }
       
       if ((strtolower(substr($_FILES["ps_abc_file"]["name"], -4)) != ".pdf") &&
@@ -123,10 +123,12 @@
 
     // Store whether a supervisor was selected or randomly designated
     if (is_numeric($_POST['ps_abc_supervisor']) && $_POST['ps_abc_supervisor'] > 0) {
-      $teacherSelection = 0;
+      $teacherSelection = 1;
+      $randomInfo = "(S)";
     }
     else {
-      $teacherSelection = 1;
+      $teacherSelection = 0;
+      $randomInfo = "(R)";
     }
 
     $name=trim($_POST['ps_abc_name']);
@@ -139,7 +141,7 @@
       $userMessage = "
 Als boodschap heb ik het volgende ingevoerd: \"{$_POST['message']}\".
 ";
-      $infoBlock .= "<li>Bericht: ".$_POST['message'];
+      $infoBlock .= "<li>Bericht: ".htmlentities($_POST['message']);
     }    
      
     $ps_abc_tempfile = prepareFile("PS ABC", $_FILES["ps_abc_file"], $fileNameComponent, $fileIdComponent);
@@ -160,7 +162,8 @@ $userMessage
 Met vriendelijke groet,
 
 $name
-$idnr";
+$idnr
+[ dit is een automatisch verstuurde mail via SSSS | $randomInfo ]";
       
       if (!(isset($_GET['debug']))) {
         $mail->Send();

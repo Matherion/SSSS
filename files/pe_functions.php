@@ -27,9 +27,9 @@
       $idnr_1=trim($_POST['pe_idnr_1']);
       $email_1=trim($_POST['pe_email_1']);
       
-      $infoBlock .= "<li>Naam: $name_1</li>
-                     <li>Id-nummer: $idnr_1</li>
-                     <li>E-mail adres: $email_1</li>";
+      $infoBlock .= "<li>Naam: ".htmlentities($name_1)."</li>
+                     <li>Id-nummer: ".htmlentities($idnr_1)."</li>
+                     <li>E-mail adres: ".htmlentities($email_1)."</li>";
 
       if (strlen($_POST['pe_name_1']) == 0) {
         $errorBlock .= "<li>Er is geen naam ingevuld voor student 1.</li>";
@@ -53,7 +53,7 @@
     }
 
     // Verification of general fields for second student
-    if ($_POST['pe_nrOfPeople'] == 2) {
+    if ($_POST['pe_nrOfPeople'] >= 2) {
       if (isset($_POST['pe_name_2'])       &&
           isset($_POST['pe_idnr_2'])       &&
           isset($_POST['pe_email_2'])      ) {
@@ -62,9 +62,9 @@
         $idnr_2=trim($_POST['pe_idnr_2']);
         $email_2=trim($_POST['pe_email_2']);
         
-        $infoBlock .= "<li>Naam: $name_2</li>
-                       <li>Id-nummer: $idnr_2</li>
-                       <li>E-mail adres: $email_2</li>";
+        $infoBlock .= "<li>Naam 2: ".htmlentities($name_2)."</li>
+                       <li>Id-nummer 2: ".htmlentities($idnr_2)."</li>
+                       <li>E-mail adres 2: ".htmlentities($email_2)."</li>";
 
         if (strlen($_POST['pe_name_2']) == 0) {
           $errorBlock .= "<li>Er is geen naam ingevuld voor student 2.</li>";
@@ -85,6 +85,42 @@
       }
       else {
         $errorBlock .= "<li>Een of meerdere van de basisvelden voor student 2 (naam, id-nummer, email-adres) is leeg.</li>";
+      }
+    }
+
+    // Verification of general fields for third student
+    if ($_POST['pe_nrOfPeople'] >= 3) {
+      if (isset($_POST['pe_name_3'])       &&
+          isset($_POST['pe_idnr_3'])       &&
+          isset($_POST['pe_email_3'])      ) {
+
+        $name_3=trim($_POST['pe_name_3']);
+        $idnr_3=trim($_POST['pe_idnr_3']);
+        $email_3=trim($_POST['pe_email_3']);
+        
+        $infoBlock .= "<li>Naam 3: ".htmlentities($name_3)."</li>
+                       <li>Id-nummer 3: ".htmlentities($idnr_3)."</li>
+                       <li>E-mail adres 3: ".htmlentities($email_3)."</li>";
+
+        if (strlen($_POST['pe_name_3']) == 0) {
+          $errorBlock .= "<li>Er is geen naam ingevuld voor student 3.</li>";
+        }
+
+        if (strlen($_POST['pe_idnr_3']) == 0) {
+          $errorBlock .= "<li>Er is geen ID-nummer ingevuld voor student 3.</li>";
+        }
+        else if (!is_numeric($idnr_3))
+        {
+          $errorBlock .= "<li>Het id-nummer van student 3 bestaat niet uit alleen maar cijfers.</li>";
+        }
+
+        if (strlen($_POST['pe_email_3']) == 0) {
+          $errorBlock .= "<li>Er is geen E-mail adres ingevuld voor student 3.</li>";
+        }
+        
+      }
+      else {
+        $errorBlock .= "<li>Een of meerdere van de basisvelden voor student 3 (naam, id-nummer, email-adres) is leeg.</li>";
       }
     }
     
@@ -126,7 +162,7 @@
                      </ul></li>";
       
       if ($_FILES["pe_paper"]["size"] > MAX_FILE_SIZE_BYTES) {
-        $errorBlock .= "<li>Fout in verslag: het bestand is groter dan {MAX_FILE_SIZE_TEXT}.</li>";
+        $errorBlock .= "<li>Fout in verslag: het bestand is groter dan ".MAX_FILE_SIZE_TEXT." (oftewel ".MAX_FILE_SIZE_BYTES." bytes). Als het een afbeelding is, verlaag de resolutie. Dit kan bijvoorbeeld op <a href=\"http://www.shrinkpictures.com/\">http://www.shrinkpictures.com/</a>.</li>";
       }
       
       if ((strtolower(substr($_FILES["pe_paper"]["name"], -4)) != ".pdf") &&
@@ -162,7 +198,7 @@
                      </ul></li>";
       
       if ($_FILES["pe_data"]["size"] > MAX_FILE_SIZE_BYTES) {
-        $errorBlock .= "<li>Fout in data: het bestand is groter dan {MAX_FILE_SIZE_TEXT}.</li>";
+        $errorBlock .= "<li>Fout in data: het bestand is groter dan ".MAX_FILE_SIZE_TEXT." (oftewel ".MAX_FILE_SIZE_BYTES." bytes). Als het een afbeelding is, verlaag de resolutie. Dit kan bijvoorbeeld op <a href=\"http://www.shrinkpictures.com/\">http://www.shrinkpictures.com/</a>.</li>";
       }
       
       if (strtolower(substr($_FILES["pe_data"]["name"], -4)) != ".sav") {
@@ -175,6 +211,75 @@
 
     }
 
+    if ($_FILES["pe_output"]["error"] > 0) {
+      if ($_FILES["pe_output"]["error"] == 4)
+      {
+        $errorBlock .= "<li>Fout in output: je hebt geen bestand geselecteerd.</li>";
+      }
+      else
+      {
+        $errorBlock .= "<li>Fout in output: er ging iets fout met het bestand. Probeer het nogmaals. De foutcode is {$_FILES["pe_output"]["error"]}.";
+      }
+    }
+    else {
+
+      $infoBlock .= "<li>Meegestuurd bestand voor je output:<ul>
+                       <li>Naam: {$_FILES["pe_output"]["name"]}</li>
+                       <li>Type: {$_FILES["pe_output"]["type"]}</li>
+                       <li>Grootte: {$_FILES["pe_output"]["size"]}</li>
+                     </ul></li>";
+      
+      if ($_FILES["pe_output"]["size"] > MAX_FILE_SIZE_BYTES) {
+        $errorBlock .= "<li>Fout in output: het bestand is groter dan ".MAX_FILE_SIZE_TEXT." (oftewel ".MAX_FILE_SIZE_BYTES." bytes).</li>";
+      }
+      
+      if ((strtolower(substr($_FILES["pe_output"]["name"], -4)) != ".spv") &&
+          (strtolower(substr($_FILES["pe_output"]["name"], -4)) != ".txt") &&
+          (strtolower(substr($_FILES["pe_output"]["name"], -4)) != ".pdf") ) {
+        $errorBlock .= "<li>Fout in output: het bestand heeft een andere extensie dan .spv, .txt, of .pdf.</li>";
+      }
+    
+      if ($errorBlock == "") {
+        $log .= "File: {$_FILES["pe_output"]["name"]} (type: {$_FILES["pe_output"]["type"]}, size: {$_FILES["pe_output"]["size"]}).\n";
+      }
+
+    }
+
+    if ($_FILES["pe_syntax"]["error"] > 0) {
+      if ($_FILES["pe_syntax"]["error"] == 4)
+      {
+        $log .= "No syntax file specified.\n";
+        $infoBlock .= "<li>Er is voor gekozen geen syntax file mee te sturen.</li>";
+      }
+      else
+      {
+        $errorBlock .= "<li>Fout in syntax: er ging iets fout met het bestand. Probeer het nogmaals. De foutcode is {$_FILES["pe_syntax"]["error"]}.";
+      }
+    }
+    else {
+
+      $infoBlock .= "<li>Meegestuurd bestand voor je syntax:<ul>
+                       <li>Naam: {$_FILES["pe_syntax"]["name"]}</li>
+                       <li>Type: {$_FILES["pe_syntax"]["type"]}</li>
+                       <li>Grootte: {$_FILES["pe_syntax"]["size"]}</li>
+                     </ul></li>";
+      
+      if ($_FILES["pe_syntax"]["size"] > MAX_FILE_SIZE_BYTES) {
+        $errorBlock .= "<li>Fout in output: het bestand is groter dan ".MAX_FILE_SIZE_TEXT." (oftewel ".MAX_FILE_SIZE_BYTES." bytes).</li>";
+      }
+      
+      if ((strtolower(substr($_FILES["pe_syntax"]["name"], -4)) != ".sps") &&
+          (strtolower(substr($_FILES["pe_syntax"]["name"], -4)) != ".txt") &&
+          (strtolower(substr($_FILES["pe_syntax"]["name"], -4)) != ".r") ) {
+        $errorBlock .= "<li>Fout in output: het bestand heeft een andere extensie dan .sps, .txt, of .r.</li>";
+      }
+    
+      if ($errorBlock == "") {
+        $log .= "File: {$_FILES["pe_syntax"]["name"]} (type: {$_FILES["pe_syntax"]["type"]}, size: {$_FILES["pe_syntax"]["size"]}).\n";
+      }
+
+    }
+    
     if ($_FILES["pe_ownwork_1"]["error"] > 0) {
       if ($_FILES["pe_ownwork_1"]["error"] == 4)
       {
@@ -194,7 +299,7 @@
                      </ul></li>";
       
       if ($_FILES["pe_ownwork_1"]["size"] > MAX_FILE_SIZE_BYTES) {
-        $errorBlock .= "<li>Fout in verklaring eigen werk 1: het bestand is groter dan {MAX_FILE_SIZE_TEXT}.</li>";
+        $errorBlock .= "<li>Fout in verklaring eigen werk 1: het bestand is groter dan ".MAX_FILE_SIZE_TEXT." (oftewel ".MAX_FILE_SIZE_BYTES." bytes). Als het een afbeelding is, verlaag de resolutie. Dit kan bijvoorbeeld op <a href=\"http://www.shrinkpictures.com/\">http://www.shrinkpictures.com/</a>.</li>";
       }
       
       if ((strtolower(substr($_FILES["pe_ownwork_1"]["name"], -4)) != ".pdf") &&
@@ -211,7 +316,7 @@
 
     }
     
-    if ($_POST['pe_nrOfPeople'] == 2) {
+    if ($_POST['pe_nrOfPeople'] >= 2) {
       if ($_FILES["pe_ownwork_2"]["error"] > 0) {
         if ($_FILES["pe_ownwork_2"]["error"] == 4)
         {
@@ -231,7 +336,7 @@
                        </ul></li>";
         
         if ($_FILES["pe_ownwork_2"]["size"] > MAX_FILE_SIZE_BYTES) {
-          $errorBlock .= "<li>Fout in verklaring eigen werk 2: het bestand is groter dan {MAX_FILE_SIZE_TEXT}.</li>";
+          $errorBlock .= "<li>Fout in verklaring eigen werk 2: het bestand is groter dan ".MAX_FILE_SIZE_TEXT." (oftewel ".MAX_FILE_SIZE_BYTES." bytes). Als het een afbeelding is, verlaag de resolutie. Dit kan bijvoorbeeld op <a href=\"http://www.shrinkpictures.com/\">http://www.shrinkpictures.com/</a>.</li>";
         }
         
         if ((strtolower(substr($_FILES["pe_ownwork_2"]["name"], -4)) != ".pdf") &&
@@ -247,6 +352,43 @@
         }
       }
     }
+
+    if ($_POST['pe_nrOfPeople'] >= 3) {
+      if ($_FILES["pe_ownwork_3"]["error"] > 0) {
+        if ($_FILES["pe_ownwork_3"]["error"] == 4)
+        {
+          $errorBlock .= "<li>Fout in verklaring eigen werk 3: er is geen bestand geselecteerd.</li>";
+        }
+        else
+        {
+          $errorBlock .= "<li>Fout in verklaring eigen werk 3: er ging iets fout met het bestand. Probeer het nogmaals. De foutcode is {$_FILES["pe_ownwork_3"]["error"]}.";
+        }
+      }
+      else {
+
+        $infoBlock .= "<li>Meegestuurd bestand voor verklaring eigen werk 2:<ul>
+                         <li>Naam: {$_FILES["pe_ownwork_3"]["name"]}</li>
+                         <li>Type: {$_FILES["pe_ownwork_3"]["type"]}</li>
+                         <li>Grootte: {$_FILES["pe_ownwork_3"]["size"]}</li>
+                       </ul></li>";
+        
+        if ($_FILES["pe_ownwork_3"]["size"] > MAX_FILE_SIZE_BYTES) {
+          $errorBlock .= "<li>Fout in verklaring eigen werk 2: het bestand is groter dan ".MAX_FILE_SIZE_TEXT." (oftewel ".MAX_FILE_SIZE_BYTES." bytes). Als het een afbeelding is, verlaag de resolutie. Dit kan bijvoorbeeld op <a href=\"http://www.shrinkpictures.com/\">http://www.shrinkpictures.com/</a>.</li>";
+        }
+        
+        if ((strtolower(substr($_FILES["pe_ownwork_3"]["name"], -4)) != ".pdf") &&
+            (strtolower(substr($_FILES["pe_ownwork_3"]["name"], -4)) != ".jpg") &&
+            (strtolower(substr($_FILES["pe_ownwork_3"]["name"], -5)) != ".jpeg") &&
+            (strtolower(substr($_FILES["pe_ownwork_3"]["name"], -4)) != ".tif") &&
+            (strtolower(substr($_FILES["pe_ownwork_3"]["name"], -5)) != ".tiff") ) {
+          $errorBlock .= "<li>Fout in verklaring eigen werk 3: het bestand heeft een andere extensie dan .pdf, .jpg, .jpeg, .tif of .tiff.</li>";
+        }
+      
+        if ($errorBlock == "") {
+          $log .= "File: {$_FILES["pe_ownwork_3"]["name"]} (type: {$_FILES["pe_ownwork_3"]["type"]}, size: {$_FILES["pe_ownwork_3"]["size"]}).\n";
+        }
+      }
+    }
     
   }
 
@@ -255,11 +397,13 @@
     global $dbHandle, $setSubmission, $setPaper, $infoBlock, $errorBlock, $courses, $course, $designatedTeacher, $log;
     
     // Store whether a supervisor was selected or randomly designated
-    if (is_numeric($_POST['ps_abc_supervisor']) && $_POST['ps_abc_supervisor'] > 0) {
-      $teacherSelection = 0;
+    if (is_numeric($_POST['pe_supervisor']) && $_POST['pe_supervisor'] > 0) {
+      $teacherSelection = 1;
+      $randomInfo = "(S)";
     }
     else {
-      $teacherSelection = 1;
+      $teacherSelection = 0;
+      $randomInfo = "(R)";
     }
 
     $name_1=trim($_POST['pe_name_1']);
@@ -274,7 +418,7 @@ $idnr_1";
     $mailIntro = "Bij deze stuur ik mijn verslag voor Psychologisch Experiment in.";
     $successMessage = "<li>De mail is succesvol verzonden naar $designatedTeacher->email, met een cc naar uzelf ($email_1)!</li>";
     
-    if ($_POST['pe_nrOfPeople'] == 2) {
+    if ($_POST['pe_nrOfPeople'] >= 2) {
       $name_2=trim($_POST['pe_name_2']);
       $idnr_2=trim($_POST['pe_idnr_2']);
       $email_2=trim($_POST['pe_email_2']);
@@ -288,36 +432,76 @@ $idnr_1 en $idnr_2";
       $successMessage = "<li>De mail is succesvol verzonden naar $designatedTeacher->email, met een cc naar uzelf ($email_1 en $email_2)!</li>";
     }
 
+    if ($_POST['pe_nrOfPeople'] >= 3) {
+      $name_3=trim($_POST['pe_name_3']);
+      $idnr_3=trim($_POST['pe_idnr_3']);
+      $email_3=trim($_POST['pe_email_3']);
+      $fileNameComponent .= " en ".$name_3;
+      $fileIdComponent .= " en ".$idnr_3;
+      $signOff = "$name_1 en $name_2 en $name_3
+$idnr_1 en $idnr_2 en en $idnr_3";
+      $mailSubject = "Het OPE verslag van $name_1 en $name_2 en $name_3, id $idnr_1 en $idnr_2 en $idnr_3";
+      $mailIntro = "Bij deze sturen wij ons verslag voor Psychologisch Experiment in.";
+      $successMessage = "<li>De mail is succesvol verzonden naar $designatedTeacher->email, met een cc naar uzelf ($email_1, $email_2 en $email_3)!</li>";
+    }
+    
     if (strlen(trim($_POST['message'])) > 0) {
       $userMessage = "
 $msgPreText \"{$_POST['message']}\".
 ";
-      $infoBlock .= "<li>Bericht: ".$_POST['message'];
+      $infoBlock .= "<li>Bericht: ".htmlentities($_POST['message']);
     }
     
     $pe_paper_tempfile = prepareFile("PE verslag", $_FILES["pe_paper"], $fileNameComponent, $fileIdComponent);
     $pe_data_tempfile = prepareFile("PE data", $_FILES["pe_data"], $fileNameComponent, $fileIdComponent);
+    $pe_output_tempfile = prepareFile("PE output", $_FILES["pe_output"], $fileNameComponent, $fileIdComponent);
     $pe_ownwork_1_tempfile = prepareFile("PE VEW", $_FILES["pe_ownwork_1"], $name_1, $idnr_1);
-    if ($_POST['pe_nrOfPeople'] == 2) {
+    if ($_POST['pe_nrOfPeople'] >= 2) {
       $pe_ownwork_2_tempfile = prepareFile("PE VEW", $_FILES["pe_ownwork_2"], $name_2, $idnr_2);
     }
+    if ($_POST['pe_nrOfPeople'] >= 3) {
+      $pe_ownwork_3_tempfile = prepareFile("PE VEW", $_FILES["pe_ownwork_3"], $name_3, $idnr_3);
+    }
 
+    // Check whether a syntax file was submitted
+    
+    if ($_FILES["pe_syntax"]["error"] > 0) {
+      if ($_FILES["pe_output"]["error"] == 4) {
+        // No syntax file submitted
+      }
+    }
+    else {
+      // Syntax file submitted
+      $pe_syntax_tempfile = prepareFile("PE syntax", $_FILES["pe_syntax"], $fileNameComponent, $fileIdComponent);
+      $syntaxAttached = true;      
+    }
+    
     $mail = new PHPMailer(true);
     try {
       $mail->SetFrom($email_1, $name_1);
       $mail->AddReplyTo($email_1, $name_1);
       $mail->AddAddress($designatedTeacher->email, $designatedTeacher->name);
       $mail->AddCC($email_1, $name_1);
-      if ($_POST['pe_nrOfPeople'] == 2) {
+      if ($_POST['pe_nrOfPeople'] >= 2) {
         $mail->AddCC($email_2, $name_2);
+      }
+      if ($_POST['pe_nrOfPeople'] >= 3) {
+        $mail->AddCC($email_3, $name_3);
       }
 //      $mail->AddCC("abchuiswerkopdracht.survey@ou.nl");
       $mail->Subject = $mailSubject;
       $mail->AddAttachment($pe_paper_tempfile);
       $mail->AddAttachment($pe_data_tempfile);
+      $mail->AddAttachment($pe_output_tempfile);
+      if ($syntaxAttached) {
+      $mail->AddAttachment($pe_syntax_tempfile);
+      }
       $mail->AddAttachment($pe_ownwork_1_tempfile);
-      if ($_POST['pe_nrOfPeople'] == 2) {
+      if ($_POST['pe_nrOfPeople'] >= 2) {
         $mail->AddAttachment($pe_ownwork_2_tempfile);
+      }
+      if ($_POST['pe_nrOfPeople'] >= 3) {
+        $mail->AddAttachment($pe_ownwork_3_tempfile);
       }
       $mail->Body = "Beste {$designatedTeacher->name},
 
@@ -325,7 +509,8 @@ $mailIntro
 $userMessage
 Met vriendelijke groet,
 
-$signOff";
+$signOff
+[ dit is een automatisch verstuurde mail via SSSS | $randomInfo ]";
       
       if (!(isset($_GET['debug']))) {
         $mail->Send();
@@ -355,8 +540,13 @@ $signOff";
                         'papers_id'=>$papers_id, 'papers_teachers_id'=>$designatedTeacher->id, 'papers_courses_id'=>$courses[$course]->id);
           $setSubmission->execute($data);
           // If two students worked together, also store second student
-          if ($_POST['pe_nrOfPeople'] == 2) {
+          if ($_POST['pe_nrOfPeople'] >= 2) {
             $data = array('name'=>$name_2, 'nr'=>$idnr_2, 'email'=>$email_2, 'course'=>$courses[$course]->id, 'teacher'=>$designatedTeacher->id,
+                          'papers_id'=>$papers_id, 'papers_teachers_id'=>$designatedTeacher->id, 'papers_courses_id'=>$courses[$course]->id);
+            $setSubmission->execute($data);
+          }
+          if ($_POST['pe_nrOfPeople'] >= 3) {
+            $data = array('name'=>$name_3, 'nr'=>$idnr_3, 'email'=>$email_3, 'course'=>$courses[$course]->id, 'teacher'=>$designatedTeacher->id,
                           'papers_id'=>$papers_id, 'papers_teachers_id'=>$designatedTeacher->id, 'papers_courses_id'=>$courses[$course]->id);
             $setSubmission->execute($data);
           }
@@ -386,9 +576,16 @@ $signOff";
     
     unlink($pe_paper_tempfile);
     unlink($pe_data_tempfile);
+    unlink($pe_output_tempfile);
+    if ($syntaxAttached) {
+      unlink($pe_syntax_tempfile);
+    }
     unlink($pe_ownwork_1_tempfile);
-    if ($_POST['pe_nrOfPeople'] == 2) {
+    if ($_POST['pe_nrOfPeople'] >= 2) {
       unlink($pe_ownwork_2_tempfile);
+    }
+    if ($_POST['pe_nrOfPeople'] >= 3) {
+      unlink($pe_ownwork_3_tempfile);
     }
 
   }

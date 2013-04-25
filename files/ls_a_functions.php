@@ -27,9 +27,9 @@
       $idnr_1=trim($_POST['ls_a_idnr_1']);
       $email_1=trim($_POST['ls_a_email_1']);
 
-      $infoBlock .= "<li>Naam student 1: $name_1</li>
-                     <li>Id-nummer student 1: $idnr_1</li>
-                     <li>E-mail adres student 1: $email_1</li>";
+      $infoBlock .= "<li>Naam: ".htmlentities($name_1)."</li>
+                     <li>Id-nummer: ".htmlentities($idnr_1)."</li>
+                     <li>E-mail adres: ".htmlentities($email_1)."</li>";
 
       if (strlen($_POST['ls_a_name_1']) == 0) {
         $errorBlock .= "<li>Er is geen naam ingevuld voor student 1.</li>";
@@ -62,9 +62,9 @@
         $idnr_2=trim($_POST['ls_a_idnr_2']);
         $email_2=trim($_POST['ls_a_email_2']);
 
-        $infoBlock .= "<li>Naam student 2: $name_2</li>
-                       <li>Id-nummer student 2: $idnr_2</li>
-                       <li>E-mail adres student 2: $email_</li>";
+        $infoBlock .= "<li>Naam: ".htmlentities($name_2)."</li>
+                       <li>Id-nummer: ".htmlentities($idnr_2)."</li>
+                       <li>E-mail adres: ".htmlentities($email_2)."</li>";
 
         if (strlen($_POST['ls_a_name_2']) == 0) {
           $errorBlock .= "<li>Er is geen naam ingevuld voor student 2.</li>";
@@ -130,7 +130,7 @@
                        </ul></li>";
         
         if ($_FILES["ls_a_a"]["size"] > MAX_FILE_SIZE_BYTES) {
-          $errorBlock .= "<li>Fout in het bestand: het bestand is groter dan {MAX_FILE_SIZE_TEXT}.</li>";
+          $errorBlock .= "<li>Fout in het bestand: het bestand is groter dan ".MAX_FILE_SIZE_TEXT." (oftewel ".MAX_FILE_SIZE_BYTES." bytes). Als het een afbeelding is, verlaag de resolutie. Dit kan bijvoorbeeld op <a href=\"http://www.shrinkpictures.com/\">http://www.shrinkpictures.com/</a>.</li>";
         }
         
         if ((strtolower(substr($_FILES["ls_a_a"]["name"], -4)) != ".pdf") &&
@@ -154,11 +154,13 @@
     global $dbHandle, $setSubmission, $setPaper, $infoBlock, $errorBlock, $courses, $course, $designatedTeacher, $log;
 
     // Store whether a supervisor was selected or randomly designated
-    if (is_numeric($_POST['ps_abc_supervisor']) && $_POST['ps_abc_supervisor'] > 0) {
-      $teacherSelection = 0;
+    if (is_numeric($_POST['ls_a_supervisor']) && $_POST['ls_a_supervisor'] > 0) {
+      $teacherSelection = 1;
+      $randomInfo = "(S)";
     }
     else {
-      $teacherSelection = 1;
+      $teacherSelection = 0;
+      $randomInfo = "(R)";
     }
 
     $name_1=trim($_POST['ls_a_name_1']);
@@ -191,7 +193,7 @@ $idnr_1 en $idnr_2";
       $userMessage = "
 $msgPreText \"{$_POST['message']}\".
 ";
-      $infoBlock .= "<li>Bericht: ".$_POST['message'];
+      $infoBlock .= "<li>Bericht: ".htmlentities($_POST['message']);
     }
 
     $ls_a_a_tempfile = prepareFile("LS A", $_FILES["ls_a_a"], $fileNameComponent, $fileIdComponent);
@@ -214,7 +216,8 @@ $mailIntro
 $userMessage
 Met vriendelijke groet,
 
-$signOff";
+$signOff
+[ dit is een automatisch verstuurde mail via SSSS | $randomInfo ]";
       
       if (!(isset($_GET['debug']))) {
         $mail->Send();

@@ -1,27 +1,40 @@
 <?php
   $pe_student_1_visibility = ' style="display:block;" ';
   $pe_student_2_visibility = ' style="display:none;" ';
+  $pe_student_3_visibility = ' style="display:none;" ';
   $pe_nrOfPeople_1_checked = ' checked="checked ';
   $pe_nrOfPeople_2_checked = '  ';
+  $pe_nrOfPeople_3_checked = '  ';
   $pe_vew_2_visibility = 'style="display:none;" ';
-  if ($_POST['pe_nrOfPeople'] == 2) {
+  $pe_vew_3_visibility = 'style="display:none;" ';
+  if ($_POST['pe_nrOfPeople'] >= 2) {
     $pe_nrOfPeople_1_checked = '  ';
     $pe_nrOfPeople_2_checked = ' checked="checked ';
     $pe_student_2_visibility = ' style="display:block;" ';
     $pe_vew_2_visibility = 'style="display:block;" ';
   }
+  if ($_POST['pe_nrOfPeople'] >= 3) {
+    $pe_nrOfPeople_2_checked = '  ';
+    $pe_nrOfPeople_3_checked = ' checked="checked ';
+    $pe_student_3_visibility = ' style="display:block;" ';
+    $pe_vew_3_visibility = 'style="display:block;" ';
+  }
 ?>
 
 <div class="subtitle">Inleveren tentamen Psychologisch Experiment</div>
-
+Let op: zorg bij het indienen van een herkansing dat de docent is geselecteerd die de vorige versie nakeek. Diezelfde docent beoordeelt de herkansing.
 <div class="headingBar">Samenwerking:</div>
 <div class="formRow" >
-  <input type="radio" name="pe_nrOfPeople" id="pe_nrOfPeople_1" value="1" <?php echo($pe_nrOfPeople_1_checked); ?> onclick="$('#pe_student_1').show();$('#pe_student_2').hide();$('#pe_vew_2').hide();"></input>
-  <label for="pe_nrOfPeople_1" onclick="$('#pe_student_1').show();$('#pe_student_2').hide();$('#pe_vew_2').hide();">Ik heb dit verslag alleen geschreven</label>
+  <input type="radio" name="pe_nrOfPeople" id="pe_nrOfPeople_1" value="1" <?php echo($pe_nrOfPeople_1_checked); ?> onclick="$('#pe_student_1').show();$('#pe_student_2').hide();$('#pe_vew_2').hide();$('#pe_student_3').hide();$('#pe_vew_3').hide();"></input>
+  <label for="pe_nrOfPeople_1" onclick="$('#pe_student_1').show();$('#pe_student_2').hide();$('#pe_vew_2').hide();$('#pe_student_3').hide();$('#pe_vew_3').hide();">Ik heb dit verslag alleen geschreven</label>
 </div>
 <div class="formRow" >
-  <input type="radio" name="pe_nrOfPeople" id="pe_nrOfPeople_2" value="2" <?php echo($pe_nrOfPeople_2_checked); ?>onclick="$('#pe_student_1').show();$('#pe_student_2').show();$('#pe_vew_2').show();"></input>
-  <label for="pe_nrOfPeople_2" onclick="$('#pe_student_1').show();$('#pe_student_2').show();$('#pe_vew_2').show();">Wij hebben samengewerkt</label>
+  <input type="radio" name="pe_nrOfPeople" id="pe_nrOfPeople_2" value="2" <?php echo($pe_nrOfPeople_2_checked); ?>onclick="$('#pe_student_1').show();$('#pe_student_2').show();$('#pe_vew_2').show();$('#pe_student_3').hide();$('#pe_vew_3').hide();"></input>
+  <label for="pe_nrOfPeople_2" onclick="$('#pe_student_1').show();$('#pe_student_2').show();$('#pe_vew_2').show();$('#pe_student_3').hide();$('#pe_vew_3').hide();">Wij hebben samengewerkt met twee studenten</label>
+</div>
+<div class="formRow" >
+  <input type="radio" name="pe_nrOfPeople" id="pe_nrOfPeople_3" value="3" <?php echo($pe_nrOfPeople_3_checked); ?>onclick="$('#pe_student_1').show();$('#pe_student_2').show();$('#pe_student_3').show();$('#pe_vew_2').show();$('#pe_vew_3').show();"></input>
+  <label for="pe_nrOfPeople_3" onclick="$('#pe_student_1').show();$('#pe_student_2').show();$('#pe_student_3').show();$('#pe_vew_2').show();$('#pe_vew_3').show();">Wij hebben samengewerkt met drie studenten</label>
 </div>
 <div class="formSection" <?php echo($pe_student_1_visibility); ?> id="pe_student_1">
   <div class="headingBar">Student 1:</div>
@@ -51,6 +64,21 @@
   <div class="formRow">
     <div class="formLabel">Email adres:</div>
     <input class="formInput" type="text" name="pe_email_2" id="email" value="<?php echo($_POST['pe_email_2']); ?>"></input>
+  </div>
+</div>
+<div class="formSection" <?php echo($pe_student_3_visibility); ?> id="pe_student_3">
+  <div class="headingBar">Student 3:</div>
+  <div class="formRow">
+    <div class="formLabel">Naam:</div>
+    <input class="formInput" type="text" name="pe_name_3" id="name" value="<?php echo($_POST['pe_name_3']); ?>"></input>
+  </div>
+  <div class="formRow">
+    <div class="formLabel">Student nummer:</div>
+    <input class="formInput" type="text" name="pe_idnr_3" id="idnr" value="<?php echo($_POST['pe_idnr_3']); ?>"></input>
+  </div>
+  <div class="formRow">
+    <div class="formLabel">Email adres:</div>
+    <input class="formInput" type="text" name="pe_email_3" id="email" value="<?php echo($_POST['pe_email_3']); ?>"></input>
   </div>
 </div>
 
@@ -83,8 +111,11 @@ Selecteer de begeleider bij wie je praktijksessies hebt gevolgd - deze persoon z
 <div class="headingBar">Bestanden:</div>
 <div class="formRow"><div class="formLabel">Verslag:</div><input class="formInput" type="file" name="pe_paper"></input></div>
 <div class="formRow"><div class="formLabel">Data bestand:</div><input class="formInput" type="file" name="pe_data"></input></div>
+<div class="formRow"><div class="formLabel">Syntax bestand:<br /><span style="font-size: 80%;">(syntax is niet verplicht)</a></div><input class="formInput" type="file" name="pe_syntax"></input></div>
+<div class="formRow"><div class="formLabel">Output bestand:</div><input class="formInput" type="file" name="pe_output"></input></div>
 <div class="formRow"><div class="formLabel">Verklaring eigen werk 1:</div><input class="formInput" type="file" name="pe_ownwork_1"></input></div>
 <div class="formRow" <?php echo($pe_vew_2_visibility); ?> id="pe_vew_2" ><div class="formLabel">Verklaring eigen werk 2:</div><input class="formInput" type="file" name="pe_ownwork_2"></input></div>
+<div class="formRow" <?php echo($pe_vew_3_visibility); ?> id="pe_vew_3" ><div class="formLabel">Verklaring eigen werk 3:</div><input class="formInput" type="file" name="pe_ownwork_3"></input></div>
 <div class="hintBlock">
   <strong>Tips:</strong>
   <ul>
